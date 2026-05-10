@@ -1,0 +1,22 @@
+# Secrets — NEVER commit
+.streamlit/secrets.toml
+.env
+*.key
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.egg-info/
+
+# User data
+data/profiles/
+
+# Mac
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
