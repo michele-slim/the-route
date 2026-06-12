@@ -25,7 +25,13 @@ def stream_message(
     with _client().messages.stream(
         model=model,
         max_tokens=max_tokens,
-        system=system,
+        system=[
+            {
+                "type": "text",
+                "text": system,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ],
         messages=[{"role": "user", "content": user}],
     ) as stream:
         for text in stream.text_stream:

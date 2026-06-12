@@ -26,9 +26,9 @@ the-route-app/
 ├── app.py                  Entry point + welcome page
 ├── pages/                  Multi-page Streamlit pages
 │   ├── 1_Intake.py         10-min questionnaire
-│   ├── 2_Snapshot.py       Personalized "where you are"
-│   ├── 3_Next_Steps.py     Prioritized actions
-│   └── 4_Chat.py           Conversation with Claude
+│   ├── 2_Review.py         "Did we get this right?" confirmation
+│   ├── 3_Snapshot.py       Personalized "where you are"
+│   └── 4_Next_Steps.py     Prioritized actions
 ├── lib/                    Shared logic
 │   ├── claude_client.py    Anthropic API wrapper
 │   ├── profile.py          User profile model + save/load

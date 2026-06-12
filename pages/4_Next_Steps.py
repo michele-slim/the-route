@@ -1,8 +1,8 @@
 """
-Snapshot page — The Route
+Next Steps page — The Route
 
-The aha moment of the product. Takes the intake profile and renders a
-personalized one-screen read of where this family is right now.
+Takes the intake profile + Snapshot and produces a prioritized action list,
+bucketed This week / This month / This year / Beyond.
 
 v0.1 — May 10, 2026.
 """
@@ -12,25 +12,32 @@ import json
 import streamlit as st
 
 from lib.claude_client import stream_message, OPUS
-from lib.prompts import VOICE_PROMPT, SNAPSHOT_INSTRUCTIONS
-from lib.profile import save_snapshot, clear_snapshot, hydrate_session_state
+from lib.prompts import VOICE_PROMPT, NEXT_STEPS_INSTRUCTIONS
+from lib.profile import save_next_steps, clear_next_steps, hydrate_session_state
 
-st.set_page_config(page_title="Snapshot — The Route", layout="centered")
+st.set_page_config(page_title="Next Steps — The Route", layout="centered")
 hydrate_session_state()
 
 
 # ─────────────────────────────────────────────
-# Guard: profile must exist
+# Guards: profile + snapshot must exist
 # ─────────────────────────────────────────────
 profile = st.session_state.get("profile")
+snapshot = st.session_state.get("snapshot")
 
 if not profile:
     st.title("We need to hear about your young person first.")
-    st.write(
-        "The snapshot reads your intake and tells you where you are right now. "
-        "Without the intake there's nothing to read."
-    )
+    st.write("The Next Steps build on the intake. Without it there's nothing to prioritize.")
     st.page_link("pages/1_Intake.py", label="Go to the intake →")
+    st.stop()
+
+if not snapshot:
+    st.title("Read the Snapshot first.")
+    st.write(
+        "Next Steps build on what the Snapshot already laid out. "
+        "Open the Snapshot, then come back."
+    )
+    st.page_link("pages/3_Snapshot.py", label="Go to the Snapshot →")
     st.stop()
 
 
@@ -42,8 +49,6 @@ def _their_name(p: dict) -> str:
 
 
 def _profile_for_model(p: dict) -> str:
-    """Trim and shape the profile for the model. Drop noisy 'Other' fallbacks
-    when the user didn't fill them in."""
     cleaned = {}
     for k, v in p.items():
         if v in (None, "", "—", []):
@@ -54,11 +59,12 @@ def _profile_for_model(p: dict) -> str:
     return json.dumps(cleaned, indent=2, default=str)
 
 
-def _build_user_message(p: dict) -> str:
+def _build_user_message(p: dict, snap: str) -> str:
     return (
-        "Here is the parent's intake. Write the Snapshot for them, following "
-        "the section structure and tone in your instructions.\n\n"
-        f"```json\n{_profile_for_model(p)}\n```"
+        "Here is the parent's intake and the Snapshot you already wrote for them. "
+        "Write the Next Steps page now, following the structure in your instructions.\n\n"
+        f"## Intake\n```json\n{_profile_for_model(p)}\n```\n\n"
+        f"## Snapshot\n{snap}"
     )
 
 
@@ -66,10 +72,10 @@ def _build_user_message(p: dict) -> str:
 # Header
 # ─────────────────────────────────────────────
 their = _their_name(profile)
-st.title(f"Where you and {their} are right now.")
+st.title(f"What to do, in what order.")
 st.caption(
-    "Read this once. It will not be the last word — the next page is what to do "
-    "about it."
+    f"Prioritized for {their}. This is the page to come back to. "
+    "Each item: why it matters, what to do, where to start, what to watch out for."
 )
 st.write("---")
 
@@ -78,29 +84,29 @@ st.write("---")
 # Generate (cache in session_state, regen on demand)
 # ─────────────────────────────────────────────
 def _generate():
-    system = VOICE_PROMPT + "\n\n---\n\n" + SNAPSHOT_INSTRUCTIONS
-    user = _build_user_message(profile)
+    system = VOICE_PROMPT + "\n\n---\n\n" + NEXT_STEPS_INSTRUCTIONS
+    user = _build_user_message(profile, snapshot)
     placeholder = st.empty()
     chunks: list[str] = []
-    for piece in stream_message(system=system, user=user, model=OPUS, max_tokens=2200):
+    for piece in stream_message(system=system, user=user, model=OPUS, max_tokens=4500):
         chunks.append(piece)
         placeholder.markdown("".join(chunks))
     return "".join(chunks)
 
 
-snapshot = st.session_state.get("snapshot")
+next_steps = st.session_state.get("next_steps")
 
-if snapshot:
-    st.markdown(snapshot)
+if next_steps:
+    st.markdown(next_steps)
 else:
-    with st.spinner("Reading your intake…"):
+    with st.spinner("Pulling together what comes next…"):
         try:
-            snapshot = _generate()
-            st.session_state["snapshot"] = snapshot
-            save_snapshot(snapshot)
+            next_steps = _generate()
+            st.session_state["next_steps"] = next_steps
+            save_next_steps(next_steps)
         except Exception as e:
             st.error(
-                "Something broke trying to generate the snapshot. "
+                "Something broke trying to generate Next Steps. "
                 "Check that the Anthropic API key is set in `.streamlit/secrets.toml`."
             )
             st.exception(e)
@@ -115,10 +121,9 @@ col_a, col_b = st.columns(2)
 
 with col_a:
     if st.button("Regenerate"):
-        st.session_state.pop("snapshot", None)
         st.session_state.pop("next_steps", None)
-        clear_snapshot()
+        clear_next_steps()
         st.rerun()
 
 with col_b:
-    st.page_link("pages/3_Next_Steps.py", label="Continue to Next Steps →")
+    st.button("Open Chat →", disabled=True, help="Coming next build.")
