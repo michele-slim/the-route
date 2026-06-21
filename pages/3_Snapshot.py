@@ -25,7 +25,7 @@ hydrate_session_state()
 profile = st.session_state.get("profile")
 
 if not profile:
-    st.title("We need to hear about your young person first.")
+    st.title("We need to hear about your kid first.")
     st.write(
         "The snapshot reads your intake and tells you where you are right now. "
         "Without the intake there's nothing to read."
@@ -48,7 +48,7 @@ if not st.session_state.get("confirmed"):
 # Helpers
 # ─────────────────────────────────────────────
 def _their_name(p: dict) -> str:
-    return (p.get("their_name") or "your young person").strip() or "your young person"
+    return (p.get("their_name") or "your kid").strip() or "your kid"
 
 
 def _profile_for_model(p: dict) -> str:

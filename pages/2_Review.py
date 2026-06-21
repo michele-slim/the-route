@@ -9,10 +9,12 @@ Deliberately NO AI on this page. The playback is assembled from the
 parent's actual answers by plain code, so what they confirm is exactly
 what the system has — nothing paraphrased, nothing invented.
 
-Also runs deterministic contradiction checks (e.g. age 16 + "aged out")
-and surfaces them as flags the parent can resolve before continuing.
+Also runs deterministic contradiction checks and surfaces them as flags
+the parent can resolve before continuing.
 
 Three CTAs: This is right / Edit something / Add a note.
+
+Updated for intake v0.4 (June 20, 2026 field schema).
 """
 
 import streamlit as st
@@ -29,7 +31,7 @@ hydrate_session_state()
 profile = st.session_state.get("profile")
 
 if not profile:
-    st.title("We need to hear about your young person first.")
+    st.title("We need to hear about your kid first.")
     st.write("This page plays back what we understood from your intake. Without the intake there's nothing to play back.")
     st.page_link("pages/1_Intake.py", label="Go to the intake →")
     st.stop()
@@ -55,10 +57,10 @@ def _quote(text: str) -> str:
     return "\n".join("> " + line for line in text.splitlines() if line.strip())
 
 
-name = _val("their_name") or "your young person"
+name = _val("their_name") or "your kid"
 age = profile.get("their_age")
 state = _val("state")
-school = _val("school_status")
+education = _val("education_status")
 
 
 # ─────────────────────────────────────────────
@@ -66,18 +68,17 @@ school = _val("school_status")
 # ─────────────────────────────────────────────
 flags = []
 
-if school == "Recently aged out, nothing in place yet" and isinstance(age, int) and age <= 17:
+if education == "High School" and isinstance(age, int) and age >= 23:
     flags.append(
-        f"You said {name} is **{age}**, and also that they've **aged out of school services**. "
-        "Those don't usually go together — school services run to 21 in New Jersey and 22 in New York. "
-        "If one of these is off, hit **Edit something** below."
-    )
-
-if school == "Still in high school (with an IEP)" and isinstance(age, int) and age >= 23:
-    flags.append(
-        f"You said {name} is **{age}** and still in high school with an IEP. "
+        f"You said {name} is **{age}** and still in high school. "
         "IEP services typically end at 21 (NJ) or 22 (NY) — if one of these is off, "
         "hit **Edit something** below."
+    )
+
+if education == "College or postsecondary program" and isinstance(age, int) and age <= 16:
+    flags.append(
+        f"You said {name} is **{age}** and already in a postsecondary program. "
+        "That's unusually early — if the age or the status is off, hit **Edit something**."
     )
 
 diagnoses = _list("diagnoses")
@@ -121,14 +122,13 @@ sections.append((f"About {name}", about))
 # In the parent's words
 words = []
 for label, key in [
-    ("Their main challenges", "primary_challenges"),
-    ("On their best day", "best_day_challenges"),
-    ("On their worst day", "worst_day_challenges"),
-    ("Their strengths", "primary_strengths"),
-    ("What they love", "what_they_love"),
-    ("What they hate", "what_they_hate"),
-    ("What they're great at", "what_great_at"),
-    ("Where they struggle", "where_they_struggle"),
+    ("Their associated challenges", "associated_challenges"),
+    ("What that looks like day to day", "challenges_everyday"),
+    ("Strategies that have worked", "strategies_worked"),
+    ("Strategies that didn't fit or work", "strategies_not_worked"),
+    ("Their strengths", "strengths"),
+    ("Where else they shine", "where_they_shine"),
+    ("Anything else you told us", "anything_else"),
 ]:
     if _val(key):
         words.append(f"**{label}**, in your words:")
@@ -137,21 +137,30 @@ sections.append(("What you told us about who they are", words))
 
 # School & what's next
 standing = []
-if school:
-    standing.append(f"School-wise: **{school}**.")
-gm, gy = _val("grad_month"), _val("grad_year")
-if gm and gm != "Not sure" and gy and gy != "Not sure":
-    standing.append(f"Expected to graduate or age out: **{gm} {gy}**.")
-if _val("whats_next"):
-    standing.append(f"What {name} wants next, in your words:")
-    standing.append(_quote(_val("whats_next")))
-if _val("good_options"):
-    standing.append("Options that seem right to you:")
-    standing.append(_quote(_val("good_options")))
+if education:
+    standing.append(f"School-wise: **{education}**.")
+    if education == "High School":
+        bits = []
+        if _val("hs_type"):
+            bits.append(_val("hs_type").lower())
+        if _val("hs_year"):
+            bits.append(_val("hs_year"))
+        if _val("hs_plan"):
+            bits.append(_val("hs_plan"))
+        if bits:
+            standing.append("Details: " + " · ".join(bits) + ".")
+    elif education == "College or postsecondary program" and _val("postsec_stage"):
+        standing.append(f"Stage: {_val('postsec_stage').lower()}.")
+    elif education == "Something else / unsure" and _val("education_other"):
+        standing.append(f"You said: {_val('education_other')}")
+if _val("current_program"):
+    standing.append(f"Which one: {_val('current_program')}.")
+if _val("grad_date"):
+    standing.append(f"Expected to graduate or age out: **{_val('grad_date')}**.")
 
 considering = _list("considering")
 if considering:
-    standing.append("**Paths on the table:**")
+    standing.append("**Next steps on the table:**")
     standing.extend(f"- {c}" for c in considering)
     if _val("considering_other"):
         standing.append(f"- {_val('considering_other')}")
@@ -177,10 +186,8 @@ for status, header in [
     ("Pending", "**Pending:**"),
     ("Rejected", "**Rejected:**"),
     ("Not started", "**Not started:**"),
+    ("Ruled out", "**Ruled out:**"),
     ("Not sure", "**Not sure:**"),
-    # Legacy v0.2 statuses, so old profiles still play back
-    ("Done", "**Done:**"),
-    ("Unnecessary", "**You marked as not needed:**"),
 ]:
     items = [label for label, s in pieces.items() if s == status]
     if items:
@@ -207,33 +214,20 @@ if _val("insurance"):
     piece_lines.append(f"Health insurance: **{_val('insurance')}**.")
 sections.append(("The big transition pieces", piece_lines))
 
-# What you've tried
-tried = []
-if _val("tried_working"):
-    tried.append("Working:")
-    tried.append(_quote(_val("tried_working")))
-if _val("tried_not_working"):
-    tried.append("Didn't fit or didn't work:")
-    tried.append(_quote(_val("tried_not_working")))
-sections.append(("What you've tried so far", tried))
-
 # Who's around
 around = []
 if _list("support_network"):
     around.append("Day to day: " + ", ".join(_list("support_network")) + ".")
 past = [p for p in _list("worked_with_past") if p != "None of the above"]
-current = [p for p in _list("worked_with_current") if p != "None of the above"]
+current = [p for p in _list("worked_with_current") if p not in ("None of the above", "Something else")]
+if _val("worked_with_other"):
+    current.append(_val("worked_with_other"))
 if current:
     around.append("Currently working with: " + ", ".join(current) + ".")
 if past:
     around.append("Have worked with before: " + ", ".join(past) + ".")
 if not past and not current and (_list("worked_with_past") or _list("worked_with_current")):
     around.append("You haven't worked with advocates, attorneys, or coordinators yet.")
-# Legacy v0.2 field
-if _list("professionals") and not (past or current):
-    pros = [p for p in _list("professionals") if p != "None of the above"]
-    if pros:
-        around.append("You've worked with: " + ", ".join(pros) + ".")
 sections.append(("Who's around you", around))
 
 # What's on the parent's mind

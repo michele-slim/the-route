@@ -38,7 +38,7 @@ def _persist(payload: dict) -> None:
     if _ephemeral():
         return
     _ensure_dir()
-    _persist(payload)
+    _PROFILE_PATH.write_text(json.dumps(payload, indent=2, default=str))
 
 
 def save_profile(profile: dict) -> None:

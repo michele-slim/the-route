@@ -13,7 +13,8 @@ import streamlit as st
 
 from lib.claude_client import stream_message, OPUS
 from lib.prompts import VOICE_PROMPT, NEXT_STEPS_INSTRUCTIONS
-from lib.profile import save_next_steps, clear_next_steps, hydrate_session_state
+from lib.profile import save_next_steps, clear_next_steps, hydrate_session_state, save_note
+from lib.export import build_export_text
 
 st.set_page_config(page_title="Next Steps — The Route", layout="centered")
 hydrate_session_state()
@@ -26,7 +27,7 @@ profile = st.session_state.get("profile")
 snapshot = st.session_state.get("snapshot")
 
 if not profile:
-    st.title("We need to hear about your young person first.")
+    st.title("We need to hear about your kid first.")
     st.write("The Next Steps build on the intake. Without it there's nothing to prioritize.")
     st.page_link("pages/1_Intake.py", label="Go to the intake →")
     st.stop()
@@ -45,7 +46,7 @@ if not snapshot:
 # Helpers
 # ─────────────────────────────────────────────
 def _their_name(p: dict) -> str:
-    return (p.get("their_name") or "your young person").strip() or "your young person"
+    return (p.get("their_name") or "your kid").strip() or "your kid"
 
 
 def _profile_for_model(p: dict) -> str:
@@ -114,16 +115,42 @@ else:
 
 
 # ─────────────────────────────────────────────
-# Actions
+# Actions — "this isn't quite right" fix loop (mirrors the Snapshot).
+# One line of correction saves a note and regenerates this page so the
+# fix sticks. No raw "Regenerate" — corrections should teach the tool.
 # ─────────────────────────────────────────────
 st.write("---")
-col_a, col_b = st.columns(2)
 
-with col_a:
-    if st.button("Regenerate"):
-        st.session_state.pop("next_steps", None)
-        clear_next_steps()
-        st.rerun()
+with st.expander("Something on this page isn't right →"):
+    fix = st.text_input(
+        "Tell us what's off, in a line:",
+        key="next_steps_fix",
+    )
+    if st.button("Fix it"):
+        if fix.strip():
+            save_note(f"Correction from the parent after reading Next Steps: {fix.strip()}")
+            st.session_state.pop("next_steps", None)
+            clear_next_steps()
+            st.rerun()
 
-with col_b:
-    st.button("Open Chat →", disabled=True, help="Coming next build.")
+st.button("Open Chat →", disabled=True, help="Coming next build.")
+
+
+# ─────────────────────────────────────────────
+# Testing aid: download everything to email back to Michele.
+# Bundles the intake answers + this Snapshot + these Next Steps.
+# ─────────────────────────────────────────────
+st.write("---")
+st.subheader("Testing The Route?")
+st.write(
+    "Download your full session — your answers plus what The Route showed you — "
+    "and email it to **mkunken@gmail.com**. Nothing is sent automatically; "
+    "you choose what to share."
+)
+_their = (profile.get("their_name") or "kid").lower().replace(" ", "-")
+st.download_button(
+    "Download my responses (to send to Michele)",
+    data=build_export_text(profile, snapshot or "", next_steps or ""),
+    file_name=f"the-route-session-{_their}.txt",
+    mime="text/plain",
+)
