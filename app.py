@@ -24,7 +24,7 @@ st.write(
     "to do next — in plain English, in order, with the deadlines that matter."
 )
 st.caption(
-    "Everything stays on your computer. You can stop and come back. "
+    "Your answers are private and are never shared with anyone. It's best to finish in one sitting. "
     "This is an early version we're testing — thank you for trying it."
 )
 

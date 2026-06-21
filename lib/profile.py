@@ -19,15 +19,21 @@ _PROFILE_PATH = _DATA_DIR / "current.json"
 
 
 def _ephemeral() -> bool:
-    """Demo-link mode: skip disk persistence entirely so each visitor's
-    session stands alone (st.session_state is already per-visitor).
-    Set EPHEMERAL_MODE in Streamlit secrets or the environment."""
-    if os.environ.get("EPHEMERAL_MODE"):
-        return True
-    try:
-        return bool(st.secrets.get("EPHEMERAL_MODE", False))
-    except Exception:
+    """Private by default: nothing is written to shared server storage, so each
+    visitor's session is fully isolated (st.session_state is already per-visitor)
+    and no one can ever see another family's answers. This is the safe default
+    for the shared demo link.
+
+    Opt OUT only for single-user local dev where you want answers to survive a
+    browser refresh, by setting PERSIST_PROFILES=1 in the environment or secrets."""
+    if os.environ.get("PERSIST_PROFILES"):
         return False
+    try:
+        if st.secrets.get("PERSIST_PROFILES", False):
+            return False
+    except Exception:
+        pass
+    return True
 
 
 def _ensure_dir() -> None:

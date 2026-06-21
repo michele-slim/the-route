@@ -68,7 +68,8 @@ def checkbox_group(options: list, saved_keys: list, key_prefix: str) -> list:
 st.title("Let's get the full picture.")
 st.write(
     "Tell us about your kid and where everything stands. This takes about **15 to 30 minutes**. "
-    "Everything stays on your computer. You can save and come back if you need to step away. "
+    "Your answers are private — they stay in your own browser and are never shared with anyone, "
+    "including other families using this. It's best to finish in one sitting. "
     "Some questions are multiple choice, some are write-in — take as much space as you need. "
     "The more we know, the more we can help."
 )
