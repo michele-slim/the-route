@@ -22,6 +22,7 @@ from the saved profile so "Edit something" returns the parent to their answers.
 import streamlit as st
 
 from lib.profile import save_profile, hydrate_session_state
+from lib.export import build_export_text
 
 st.set_page_config(page_title="Intake — The Route", layout="centered")
 hydrate_session_state()
@@ -665,5 +666,18 @@ if submitted:
     st.session_state["profile"] = profile_payload
     st.session_state.pop("confirmed", None)
     save_profile(profile_payload)
-    st.success(f"Got it{', ' + your_name if your_name else ''}. Profile saved.")
+    st.success(f"Got it{', ' + your_name if your_name else ''}. Your answers are saved for this session.")
+
+# Post-save actions live OUTSIDE the submit block, gated on the saved profile.
+# (Clicking the download button triggers a rerun where `submitted` is False, so
+# anything gated on `submitted` would vanish. Gating on the saved profile keeps
+# the download + continue link on screen.)
+if st.session_state.get("profile"):
+    st.download_button(
+        "Download a copy of your answers",
+        data=build_export_text(st.session_state["profile"]),
+        file_name="the-route-my-answers.txt",
+        mime="text/plain",
+        help="Keep this as a backup. If a later screen ever looks empty, you can email this file to mkunken@gmail.com.",
+    )
     st.page_link("pages/2_Review.py", label="Check what we understood →")

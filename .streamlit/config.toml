@@ -1,0 +1,5 @@
+[client]
+# Hide the auto-generated page list in the sidebar so testers move through the
+# flow with the on-screen buttons (intake -> review -> snapshot -> next steps)
+# instead of jumping pages out of order, which skips the save step.
+showSidebarNavigation = false
