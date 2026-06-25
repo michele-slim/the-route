@@ -411,7 +411,7 @@ st.write("")
 q(
     "Q15. Where do things stand on the big transition pieces?",
     "These are the benefits, services, and legal steps that take time to set up. Tell us where each "
-    "one is — it's fine if the answer is \"haven't started\" or \"not sure what this is.\"",
+    "one is. It's fine if the answer is \"haven't started\" or \"not sure what this is.\"",
 )
 
 _piece_status_opts = ["Accepted", "Pending", "Rejected", "Not started", "Ruled out", "Not sure"]
@@ -448,7 +448,7 @@ with st.container(border=True):
             key=f"piece::{label}",
         )
 
-    st.caption("And the legal & decision-making paperwork — check everything that's already in place.")
+    st.caption("And the legal & decision-making paperwork. Check everything that's already in place.")
     legal_stack = checkbox_group(_legal_opts, _picked(_legal_opts, "legal_stack"), "legal")
     if any(item in legal_stack for item in _legal_opts[:6]):
         legal_route = st.text_input(
@@ -485,7 +485,7 @@ st.write("---")
 st.header("Looking ahead")
 q(
     "Q17. What are you working toward?",
-    "Check all that apply — more than one is fine. These can be goals, not just what's already decided.",
+    "Check all that apply. More than one is fine. These can be goals, not just what's already decided.",
 )
 
 _college_opts = [
@@ -559,7 +559,7 @@ community_college_time = ""
 if "Community college" in considering:
     _cc_opts = ["Full time", "Part time", "Not sure yet"]
     community_college_time = st.radio(
-        "Community college — enrollment status?",
+        "Community college enrollment status?",
         options=_cc_opts,
         index=_idx(_cc_opts, "community_college_time"),
         key="community_college_time",
