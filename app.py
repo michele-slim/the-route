@@ -23,16 +23,10 @@ st.write(
     "Tell us about your kid, and we'll lay out where you stand right now and what "
     "to do next — in plain English, in order, with the deadlines that matter."
 )
-st.caption(
-    "Your answers are private and never shared. **Set aside at least 30 minutes and finish in one "
-    "sitting** — your answers stay only in your browser, so closing or refreshing the tab loses them. "
-    "This is an early version we're testing — thank you for trying it."
-)
+st.caption("An early version we're testing — thank you for trying it.")
 
 st.write("")
 st.page_link("pages/1_Intake.py", label="Start →")
-
-st.write("---")
 
 # Setup check (only surfaces if the key is missing — testers won't see it once set).
 _key = ""
@@ -41,6 +35,7 @@ try:
 except Exception:
     _key = ""
 if not _key or _key == "PASTE_YOUR_KEY_HERE":
+    st.write("---")
     st.warning(
         "Setup note (for Michele): no Anthropic API key detected. Open "
         "`.streamlit/secrets.toml` and paste the key. The intake and review screens "
