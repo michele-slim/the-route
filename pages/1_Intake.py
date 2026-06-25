@@ -69,7 +69,7 @@ def checkbox_group(options: list, saved_keys: list, key_prefix: str) -> list:
 st.title("Let's get the full picture.")
 st.write(
     "Tell us about your kid and where everything stands. Some questions are multiple choice, "
-    "some are write-in — take as much space as you need. The more we know, the more we can help."
+    "some are write-in, so take as much space as you need. The more we know, the more we can help."
 )
 st.write(
     "Your answers are private. They stay in your own browser and are never shared with anyone, "
@@ -78,8 +78,8 @@ st.write(
 st.warning(
     "**Please set aside at least 30 minutes and finish in one sitting.** Because your answers stay "
     "only in this browser, you'll lose them if you close the tab, refresh the page, or leave it idle "
-    "for a long stretch — and you'd have to start over. So keep this tab open until you're done. "
-    "When you reach the end, click **Save and continue**, then download a copy of your answers."
+    "too long. If that happens, you'd start over from the beginning. So keep this tab open until "
+    "you're done. When you reach the end, click **Save and continue**, then download a copy of your answers."
 )
 if _p:
     st.info("Your earlier answers are filled in below. Change whatever needs changing and save again.")

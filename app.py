@@ -20,10 +20,12 @@ st.subheader("A guide for parents and caregivers of young people with disabiliti
 
 st.write("")
 st.write(
-    "Tell us about your kid, and we'll lay out where you stand right now and what "
-    "to do next — in plain English, in order, with the deadlines that matter."
+    "The years from 16 to 26 pile on fast: benefits to apply for, legal decisions to make, "
+    "services to line up, and deadlines no one warns you about. The Route helps you find your "
+    "way through. Tell us about your kid, and we'll show you where things stand right now and "
+    "what to do next, in plain language and in the right order."
 )
-st.caption("An early version we're testing — thank you for trying it.")
+st.caption("This is an early version we're testing. We're glad you're here.")
 
 st.write("")
 st.page_link("pages/1_Intake.py", label="Start →")
