@@ -191,7 +191,7 @@ q(
     "Q7. What are their associated challenges?",
     "Here we're looking for the kinds of terms you'd find on a clinical evaluation, like "
     "\"executive functioning\" or \"mood regulation disorder.\" If you don't have this information, "
-    "just tell us the challenges in your own words — like \"has a hard time with organization\" or "
+    "just tell us the challenges in your own words, like \"has a hard time with organization\" or "
     "\"is very impulsive.\"",
 )
 associated_challenges = st.text_area(
@@ -229,7 +229,7 @@ q(
     "Q8. What are their strengths?",
     "We're looking for the kind of thing you'd find in a psych or educational eval, like \"excellent "
     "working memory\" or \"strong inferential reasoning.\" If you don't have this information, just tell "
-    "us the strengths in your own words — like \"can look at something once and memorize it\" or \"is "
+    "us the strengths in your own words, like \"can look at something once and memorize it\" or \"is "
     "very organized.\"",
 )
 strengths = st.text_area("Q8", value=_txt("strengths"), label_visibility="collapsed", height=120)
@@ -245,7 +245,7 @@ where_they_shine = st.text_area(
 
 q(
     "Q10. Anything else you want to tell us about your kid's challenges, strengths, interests, and/or skills?",
-    "Keep in mind we're going to ask you about hopes and dreams — and dig into specific transition goals — later.",
+    "Keep in mind we're going to ask you about hopes and dreams, and dig into specific transition goals, later.",
 )
 anything_else = st.text_area(
     "Q10", value=_txt("anything_else"), label_visibility="collapsed", height=120
@@ -344,7 +344,7 @@ _education_opts = [
     "18–21 Transition Program",
     "Vocational Program",
     "College or postsecondary program",
-    "Graduated or aged out — nothing in place right now",
+    "Graduated or aged out, nothing in place right now",
     "Something else / unsure",
 ]
 q("Q14. What's their current educational status?")
@@ -399,7 +399,7 @@ if education_status in (
     "18–21 Transition Program",
 ):
     current_program = st.text_input(
-        "Which one? Tell us the name — and where it is, if it's away from home.",
+        "Which one? Tell us the name, and where it is, if it's away from home.",
         value=_txt("current_program"),
         key="current_program",
     )
