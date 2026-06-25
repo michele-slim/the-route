@@ -24,7 +24,8 @@ st.write(
     "to do next — in plain English, in order, with the deadlines that matter."
 )
 st.caption(
-    "Your answers are private and are never shared with anyone. It's best to finish in one sitting. "
+    "Your answers are private and never shared. **Set aside at least 30 minutes and finish in one "
+    "sitting** — your answers stay only in your browser, so closing or refreshing the tab loses them. "
     "This is an early version we're testing — thank you for trying it."
 )
 
